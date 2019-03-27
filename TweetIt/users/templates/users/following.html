@@ -1,0 +1,12 @@
+{% include 'tweets/base.html' %}
+{% block content %}
+<h1>Following</h1>
+{% for following in followings %}
+	<div class="follower" style="border: 1px solid black;margin: 10px;padding: 10px;">
+		<a href="{% url 'following-user-info' following.user.id %}"><img src="{{following.image.url}}" style="width: 50px;height: 50px">
+		<p>{{following.user}}</p></a>
+		<p>{{following.description}}</p>
+		<a href="{% url 'unfollow-user' following.user.id %}">Unfollow</a>
+	</div>
+{% endfor %}
+{% endblock content %}

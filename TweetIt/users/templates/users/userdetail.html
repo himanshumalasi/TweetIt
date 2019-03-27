@@ -1,0 +1,45 @@
+{% extends 'tweets/base.html' %}
+{% block content %}
+	<div class="profile" style="border:1px solid red;padding: 10px;margin: 10px 0;">
+		<p>{{ profile.user.username }}</p>
+		<img src="{{ profile.image.url}}" width="100px" height="100px">
+		<p>
+			{{ profile.description}}
+		</p>
+		
+	</div>
+	{% for tweet in tweets %}
+		<div class="tweet">
+			{% if tweet.parent %}
+				<div class="tweet-class" style="border: 1px solid black;padding: 10px;">
+					<span>Retweet via {{ tweet.parent.user }} on {{ tweet.date_posted }}</span>
+					<p>{{ tweet.content }}</p>
+					By {{ tweet.user.username }} at {{ tweet.date_posted|timesince }} ago
+					{% if user not in  tweet.likes.all %}
+						<a href="{% url 'tweet-like' tweet.id %}">Like</a> |
+					{% else %}
+						<a href="{% url 'tweet-like' tweet.id %}">Dislike</a> |
+					{% endif %}
+					<a href="{% url 'tweet-retweet' tweet.id %}">Retweet</a> |
+					<a href="{% url 'detail-view' tweet.id %}">View</a>
+				</div>
+			{% else %}
+				<div class="tweet-class" style="border: 1px solid black;padding: 10px;">
+					<p>{{ tweet.content }}</p>
+					By {{ tweet.user.username }} at {{ tweet.date_posted|timesince }} ago
+					{% if user not in  tweet.likes.all %}
+						<a href="{% url 'tweet-like' tweet.id %}">Like</a> |
+					{% else %}
+						<a href="{% url 'tweet-like' tweet.id %}">Dislike</a> |
+					{% endif %}
+					<a href="{% url 'tweet-retweet' tweet.id %}">Retweet</a> |
+					<a href="{% url 'detail-view' tweet.id %}">View</a>
+				</div>
+			{% endif %}
+			
+		</div>
+		<hr>
+		{% empty %}
+			<p>No tweets right now...</p>
+	{% endfor %}
+{% endblock %}

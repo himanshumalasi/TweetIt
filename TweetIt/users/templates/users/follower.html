@@ -1,0 +1,12 @@
+{% include 'tweets/base.html' %}
+{% block content %}
+<h1>Follower</h1>
+{% for follower in followers %}
+	<div class="follower" style="border: 1px solid black;margin: 10px;padding: 10px;">
+		
+		<img src="{{follower.image.url}}" style="width: 50px;height: 50px">
+		<p>{{follower.user}}</p>
+		<p>{{follower.description}}</p>
+	</div>
+{% endfor %}
+{% endblock content %}

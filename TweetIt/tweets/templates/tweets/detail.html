@@ -1,0 +1,13 @@
+{% extends 'tweets/base.html' %}
+{% block content %}
+	<div class="tweet">
+			<p>{{ tweet.content }}</p>
+			By {{ tweet.user.username }} at {{ tweet.date_posted|timesince }} ago
+			{% if is_liked %}
+			<a href="{% url 'tweet-like' tweet.id %}">Dislike</a> |
+			{% else %}
+			<a href="{% url 'tweet-like' tweet.id %}">Like</a> |
+			{% endif %}
+			<a href="">Retweet</a> 
+	</div>
+{% endblock content %}

@@ -1,0 +1,154 @@
+{% extends 'tweets/base.html' %}
+{% load staticfiles %}
+{% block style %}
+ <link rel="stylesheet" type="text/css" href="{% static 'tweets/main.css/' %}">
+{% endblock style %}
+{% block content %}
+
+	<h1>Tweet Here</h1>
+	<div class="row">
+		<div class="col-md-4">
+			<div class="profile" style="border: 1px solid black; padding: 15px; margin: 10px;">
+				Username : {{ user_profile.profile.user }}
+				<br>
+				<img src="{{ user_profile.profile.image.url }}" width="60" height="60">
+				<br>
+				<p>{{ user_profile.profile.description }}</p>
+				<a href="{% url 'user-profile' user.id %}" >Edit</a> |
+				<a href="">Tweets</a> |
+				<a href="{% url 'user-followers' %}" >Followers({{ request.user.follow_who.count }})</a> |
+				<a href="{% url 'user-following' %}" >Following({{ request.user.follow_by.count }})</a>
+			</div>
+
+		</div>
+		
+		<div class="col-md-8">
+			<div class="follow-user" style="border: 1px solid black; margin: 10px; padding: 10px;">
+				<p>Who to follow?</p>
+				{% for user in follow_users %}
+					<div class="user" style="margin: 10px; padding: 10px;">
+						{{ user.username }}<br>
+						<a href="{% url 'follow-user' user.id %}">Follow</a>
+						| <a href="#">View Profile</a>
+						<br>
+					</div>
+				{% empty %}
+				<h4> No user to follow right now....</h4>
+				
+				{% endfor %}
+			
+			</div>
+		</div>
+	</div>
+	
+	
+	<br>
+	<form method="POST" class="mb-4" id="tweet-form">
+		{% csrf_token %}
+	    <textarea rows="5" cols="70" name="content" id="textarea-content"></textarea><br>
+	    <button class="btn btn-primary">Tweet</button>
+	</form>
+	{% for tweet in tweets %}
+		<div class="tweet">
+			{% if tweet.parent %}
+				<div class="tweet-class" style="border: 1px solid black;padding: 10px;">
+					<span>Retweet via {{ tweet.parent.user }} on {{ tweet.date_posted }}</span>
+					<p>{{ tweet.content }}</p>
+					By {{ tweet.user.username }} at {{ tweet.date_posted|timesince }} ago
+					{% if user not in  tweet.likes.all %}
+						<a href="{% url 'tweet-like' tweet.id %}">Like</a> |
+					{% else %}
+						<a href="{% url 'tweet-like' tweet.id %}">Dislike</a> |
+					{% endif %}
+					<a href="{% url 'tweet-retweet' tweet.id %}">Retweet</a> |
+					<a href="{% url 'tweet-delete' tweet.id %}">Delete</a> |
+					<a href="{% url 'detail-view' tweet.id %}">View</a>
+				</div>
+			{% else %}
+				<div class="tweet-class" style="border: 1px solid black;padding: 10px;">
+					<p>{{ tweet.content }}</p>
+					By {{ tweet.user.username }} at {{ tweet.date_posted|timesince }} ago
+					{% if user not in  tweet.likes.all %}
+						<a href="{% url 'tweet-like' tweet.id %}">Like</a> |
+					{% else %}
+						<a href="{% url 'tweet-like' tweet.id %}">Dislike</a> |
+					{% endif %}
+					<a href="{% url 'tweet-retweet' tweet.id %}">Retweet</a> |
+					<a href="{% url 'tweet-delete' tweet.id %}">Delete</a> |
+					<a href="{% url 'detail-view' tweet.id %}">View</a>
+				</div>
+			{% endif %}
+			
+		</div>
+		<hr>
+		{% empty %}
+			<p>No tweets right now...</p>
+	{% endfor %}
+
+	{% for tweet in following_user_tweet %}
+		<div class="tweet">
+			{% for x in tweet %}
+				{% if x.parent %}
+				<div class="tweet-class" style="border: 1px solid black;padding: 10px;margin: 10px;">
+					<span>Retweet via {{ x.parent.user }} on {{ x.date_posted }}</span>
+					<p>{{ x.content }}</p>
+					By {{ x.user.username }} at {{ x.date_posted|timesince }} ago
+					{% if user not in  x.likes.all %}
+						<a href="{% url 'tweet-like' x.id %}">Like</a> |
+					{% else %}
+						<a href="{% url 'tweet-like' x.id %}">Dislike</a> |
+					{% endif %}
+					<a href="{% url 'tweet-retweet' x.id %}">Retweet</a> |
+					<a href="{% url 'tweet-delete' x.id %}">Delete</a> |
+					<a href="{% url 'detail-view' x.id %}">View</a>
+				</div>
+				{% else %}
+				<div class="tweet-class" style="border: 1px solid black;padding: 10px;margin: 10px;">
+					<p>{{ x.content }}</p>
+					By {{ x.user.username }} at {{ x.date_posted|timesince }} ago
+					{% if user not in  x.likes.all %}
+						<a href="{% url 'tweet-like' x.id %}">Like</a> |
+					{% else %}
+						<a href="{% url 'tweet-like' x.id %}">Dislike</a> |
+					{% endif %}
+					<a href="{% url 'tweet-retweet' x.id %}">Retweet</a> |
+					<a href="{% url 'tweet-delete' x.id %}">Delete</a> |
+					<a href="{% url 'detail-view' x.id %}">View</a>
+				</div>
+				{% endif %}
+			{% endfor %}
+			
+		</div>
+		<hr>
+	{% endfor %}
+	<script>
+		var startChar = 140;
+		var currentChar = 0;
+		var span = "<span id='CharLeft' class='green-color'>"+ startChar +"</span>";
+		$('#tweet-form').append(span);
+
+		$('#textarea-content').keyup(function (event) {
+			var tweetValue = $(this).val();
+			currentChar = startChar - tweetValue.length;
+			var spanChar = $('#CharLeft');
+			spanChar.text(currentChar);
+
+			if(currentChar>0){
+				spanChar.addClass('green-color');
+				spanChar.removeClass('grey-color');
+				spanChar.removeClass('red-color');
+			}
+			else if(currentChar == 0){
+				spanChar.addClass('grey-color');
+				spanChar.removeClass('red-color');
+				spanChar.removeClass('green-color');
+			}
+			else if(currentChar < 0){
+				spanChar.addClass('red-color');
+				spanChar.removeClass('green-color');
+				spanChar.removeClass('grey-color');
+			}
+		})
+
+	</script>
+{% endblock content %}
